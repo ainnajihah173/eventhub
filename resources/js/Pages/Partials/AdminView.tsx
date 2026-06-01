@@ -81,7 +81,7 @@ export default function AdminView({ stats }: AdminViewProps) {
                     </p>
 
                     <Link 
-                        href="#" // To be built in next step
+                        href="admin.events.moderation" // To be built in next step
                         className="inline-flex items-center justify-center w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl transition"
                     >
                         Audit Events

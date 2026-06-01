@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {
                 label: 'Moderation',
                 items: [
-                    { label: 'Event Review', icon: <CheckSquare size={20} />, href: '#' },
+                    { label: 'Event Review', icon: <CheckSquare size={20} />, href: route('admin.events.moderation') },
                     { label: 'Fraud Alerts', icon: <ShieldAlert size={20} />, href: '#' },
                 ]
             },

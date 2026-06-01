@@ -16,11 +16,12 @@ return new class extends Migration {
             $table->string('title');
             $table->text('description');
             $table->string('location');
-            $table->dateTime('date_time');
+            $table->dateTime('start_date_time');
+            $table->dateTime('end_date_time');
             $table->decimal('price', 10, 2);
             $table->integer('available_slots');
             $table->string('thumbnail')->nullable();
-            $table->string('status')->default('pending'); // pending, published, rejected
+            $table->enum('status', ['pending', 'published', 'rejected'])->default('pending'); // pending, published, rejected
             $table->timestamps();
         });
     }

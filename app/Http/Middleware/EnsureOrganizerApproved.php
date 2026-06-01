@@ -17,9 +17,14 @@ class EnsureOrganizerApproved
     {
         $user = $request->user();
 
-        // If they are an organizer but not active yet
+        // 1. Check if the current route is already the 'pending' page
+        // This prevents the infinite loop
+        if ($request->routeIs('organizer.pending')) {
+            return $next($request);
+        }
+
+        // 2. Redirect pending organizers
         if ($user && $user->role === 'organizer' && $user->status === 'pending') {
-            // Redirect them to the "Hold on" page
             return redirect()->route('organizer.pending');
         }
 

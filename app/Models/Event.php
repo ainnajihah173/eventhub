@@ -11,7 +11,8 @@ class Event extends Model
         'title',
         'description',
         'location',
-        'date_time',
+        'start_date_time',
+        'end_date_time',
         'price',
         'available_slots',
         'thumbnail',
@@ -22,4 +23,13 @@ class Event extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    /**
+     * Alias for organizer relationship to match standard conventions.
+     */
+    public function user()
+    {
+        return $this->organizer();
+    }
+
 }
