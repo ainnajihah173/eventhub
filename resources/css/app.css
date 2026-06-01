@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Clean up autofill colors for light mode */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #1e293b !important;
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+body {
+    background-color: #f8fafc; /* Very light slate gray */
+    color: #1e293b;
+}
