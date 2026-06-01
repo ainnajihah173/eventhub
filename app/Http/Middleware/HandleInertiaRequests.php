@@ -29,11 +29,17 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            'auth' => [
-                'user' => $request->user(),
-            ],
-        ];
+         return [
+        ...parent::share($request),
+        'auth' => [
+            'user' => $request->user(),
+            // Ensure role is explicitly passed if not in the user object
+            'role' => $request->user() ? $request->user()->role : null, 
+        ],
+        // Flash messages for those "Aesthetic" notifications
+        'flash' => [
+            'message' => $request->session()->get('message'),
+        ],
+    ];
     }
 }

@@ -30,9 +30,17 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
+        $user = $request->user();
+
+        // Custom check: If user is suspended, log them out immediately
+        if ($user->status === 'suspended') {
+            Auth::guard('web')->logout();
+            return back()->withErrors(['email' => 'This account has been suspended.']);
+        }
+
+        // Modern SaaS redirect logic
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

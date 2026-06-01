@@ -1,26 +1,40 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import AdminView from './Partials/AdminView';
+import OrganizerView from './Partials/OrganizerView';
+import AttendeeView from './Partials/AttendeeView';
+import { usePage, Head } from '@inertiajs/react';
 
-export default function Dashboard() {
+export default function Dashboard(props: any) {
+    const page = usePage().props as any;
+    const { auth } = page;
+    const role = auth?.user?.role ?? auth?.role ?? null;
+
+    const stats = page.stats ?? {};
+    const recent_events = page.recent_events ?? [];
+    const upcoming_events = page.upcoming_events ?? [];
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
+        <DashboardLayout>
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
+            <div className="animate-in fade-in duration-700">
+                {role === 'admin' && <AdminView stats={stats} />}
+
+                {role === 'organizer' && (
+                    <OrganizerView stats={stats} events={recent_events} />
+                )}
+
+                {role === 'user' && (
+                    <AttendeeView events={upcoming_events} />
+                )}
+
+                {/* Fallback if role is undefined */}
+                {!['admin', 'organizer', 'user'].includes(role) && (
+                    <div className="p-10 bg-white rounded-3xl text-center shadow-sm border border-gray-100">
+                        <p className="text-gray-500">Initializing your profile...</p>
                     </div>
-                </div>
+                )}
             </div>
-        </AuthenticatedLayout>
+        </DashboardLayout>
     );
 }

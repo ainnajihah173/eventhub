@@ -17,11 +17,16 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'status',
+        'name',
+        'email',
+        'password',
+        'role',
+        'status',
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
     protected function casts(): array
@@ -40,7 +45,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isOrganizer(): bool
     {
         return $this->role === 'organizer';
-    }   
+    }
 
     public function isUser(): bool
     {
@@ -60,5 +65,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function organizerProfile()
     {
         return $this->hasOne(OrganizerProfile::class);
+    }
+
+    // Helper methods for clean code in controllers/middleware
+    public function isPendingOrganizer(): bool
+    {
+        return $this->role === 'organizer' && $this->status === 'pending';
+    }
+
+    public function isApprovedOrganizer(): bool
+    {
+        return $this->role === 'organizer' && $this->status === 'active';
+    }
+
+    public function events()
+    {
+        return $this->hasMany(Event::class);
     }
 }

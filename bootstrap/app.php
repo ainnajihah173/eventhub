@@ -4,6 +4,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use App\Http\Middleware\EnsureNotSuspended;
+use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\EnsureOrganizerApproved;
+
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,9 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Registering our custom middleware aliases
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
-            'not-suspended' => \App\Http\Middleware\EnsureNotSuspended::class,
+            'role' => EnsureRole::class,
+            'not_suspended' => EnsureNotSuspended::class,
+            'approved_org' => EnsureOrganizerApproved::class,
         ]);
 
         // Apply suspension check globally to auth routes

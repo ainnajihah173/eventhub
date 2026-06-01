@@ -1,52 +1,44 @@
 <?php
 
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\OrganizerApprovalController;
-use App\Http\Controllers\Organizer\ProfileController as OrgProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\Admin\OrganizerApprovalController;
 
-Route::get('/', fn() => inertia('Welcome'))->name('home');
 
-// Breeze auth routes (login, register, password reset, email verify)
-require __DIR__.'/auth.php';
+// 1. PUBLIC ROUTES
+Route::get('/', function () {
+    return Inertia::render('Welcome'); });
 
-// Authenticated routes
-Route::middleware(['auth', 'verified'])->group(function () {
+// 2. AUTHENTICATED ROUTES (Shared)
+Route::middleware(['auth', 'verified', 'not_suspended'])->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Organizer: apply for organizer role
-    Route::prefix('organizer')->name('organizer.')->group(function () {
-        Route::get('/apply', [OrgProfileController::class, 'create'])
-            ->name('apply');
-        Route::post('/apply', [OrgProfileController::class, 'store'])
-            ->name('apply.store');
-        Route::get('/pending', [OrgProfileController::class, 'pending'])
-            ->name('pending');
+    // 3. ADMIN ONLY
+    Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/approvals', [OrganizerApprovalController::class, 'index'])->name('approvals.index');
+        Route::post('/approvals/{profile}/approve', [OrganizerApprovalController::class, 'approve'])->name('approvals.approve');
+        Route::post('/approvals/{profile}/reject', [OrganizerApprovalController::class, 'reject'])->name('approvals.reject');
     });
 
-    // Admin panel
-    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+    // 4. ORGANIZER ONLY
+    Route::middleware(['auth', 'verified', 'role:organizer'])->prefix('organizer')->name('organizer.')->group(function () {
 
-        Route::get('/dashboard', fn() => inertia('Admin/Dashboard'))
-            ->name('dashboard');
+        // Page shown if status is 'pending'
+        Route::get('/pending', function () {
+            return Inertia::render('Auth/PendingOrganizer');
+        })->name('organizer.pending');
 
-        // Organizer approvals
-        Route::get('/approvals', [OrganizerApprovalController::class, 'index'])
-            ->name('approvals');
-        Route::patch('/approvals/{profile}/approve', [OrganizerApprovalController::class, 'approve'])
-            ->name('approvals.approve');
-        Route::patch('/approvals/{profile}/reject', [OrganizerApprovalController::class, 'reject'])
-            ->name('approvals.reject');
-
-        // User management
-        Route::get('/users', [AdminUserController::class, 'index'])
-            ->name('users');
-        Route::patch('/users/{user}/suspend', [AdminUserController::class, 'suspend'])
-            ->name('users.suspend');
-        Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate'])
-            ->name('users.activate');
+        // PROTECTED ORGANIZER ROUTES (Must be approved)
+        Route::middleware(['approved_org'])->group(function () {
+            Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+            // ... other event management routes
+        });
     });
 });
+
+
+// Breeze auth routes (login, register, password reset, email verify)
+require __DIR__ . '/auth.php';

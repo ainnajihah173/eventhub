@@ -31,25 +31,29 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // 1. Validation (Clean & Strict)
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:user,organizer',
-            // Organizer specific validation
-            'org_name' => 'required_if:role,organizer|string|max:255',
-            'id_proof' => 'required_if:role,organizer|file|mimes:pdf,jpg,png|max:2048',
+            // Organizer specific validation (Conditional)
+            'org_name' => 'required_if:role,organizer|nullable|string|max:255',
+            'id_proof' => 'required_if:role,organizer|nullable|file|mimes:pdf,jpg,png|max:5120', // 5MB limit
         ]);
 
+        // 2. Create the User
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            // Organizers start as 'pending'
+            // Only organizers start as 'pending'
             'status' => $request->role === 'organizer' ? 'pending' : 'active',
         ]);
-        if ($request->role === 'organizer') {
+
+        // 3. Handle Organizer Profile (Logic isolation)
+        if ($user->role === 'organizer') {
             $path = $request->file('id_proof')->store('organizer_proofs', 'public');
 
             $user->organizerProfile()->create([
@@ -59,9 +63,11 @@ class RegisteredUserController extends Controller
             ]);
         }
 
+        // 4. Standard Laravel Auth Events
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect(route('dashboard'));
+        // 5. Redirect based on role
+        return redirect(route('dashboard', absolute: false));
     }
 }
