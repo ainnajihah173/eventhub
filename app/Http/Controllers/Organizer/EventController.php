@@ -51,4 +51,20 @@ class EventController extends Controller
 
         return response()->json(['suggestion' => $suggestion]);
     }
+
+    public function attendees(Event $event)
+    {
+        // Security: Ensure this organizer owns the event
+        if ($event->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return Inertia::render('Organizer/Events/Attendees', [
+            'event' => $event,
+            'bookings' => $event->bookings()
+                ->with('user')
+                ->latest()
+                ->paginate(15)
+        ]);
+    }
 }

@@ -48,7 +48,7 @@ export default function Create() {
         <DashboardLayout>
             <Head title="Create New Event" />
 
-            <div className="max-w-5xl mx-auto">
+            <div className="mx-auto">
                 {/* Header with Back Button */}
                 <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>

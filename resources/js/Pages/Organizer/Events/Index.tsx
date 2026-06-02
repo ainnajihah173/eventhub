@@ -1,9 +1,24 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link } from '@inertiajs/react';
-import { Plus, Calendar, MapPin, MoreHorizontal, Users, ExternalLink } from 'lucide-react';
+import { Plus, Calendar, MapPin, MoreHorizontal, Users, ExternalLink, Activity, CheckCircle, Ticket } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function Index({ events }: { events: any[] }) {
+interface Event {
+    id: number;
+    title: string;
+    thumbnail?: string;
+    thumbnail_url?: string;
+    location: string;
+    start_date_time: string;
+    status: string;
+    available_slots: number;
+    participants_count?: number;
+}
+
+export default function Index({ events = [] }: { events: Event[] }) {
+    const totalParticipants = events.reduce((acc, event) => acc + (event.participants_count || 0), 0);
+    const publishedEvents = events.filter(e => e.status === 'published').length;
+
     return (
         <DashboardLayout>
             <Head title="My Events" />
@@ -16,6 +31,37 @@ export default function Index({ events }: { events: any[] }) {
                 <Link href={route('organizer.events.create')} className="bg-indigo-600 text-white px-6 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition shadow-xl shadow-indigo-100">
                     <Plus size={20} /> Create New Event
                 </Link>
+            </div>
+
+            {/* Dashboard Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+                        <Activity size={24} />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Total Events</p>
+                        <h4 className="text-2xl font-black text-slate-900">{events.length}</h4>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                        <CheckCircle size={24} />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Published</p>
+                        <h4 className="text-2xl font-black text-slate-900">{publishedEvents}</h4>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex items-center gap-4">
+                    <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                        <Ticket size={24} />
+                    </div>
+                    <div>
+                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Participants</p>
+                        <h4 className="text-2xl font-black text-slate-900">{totalParticipants}</h4>
+                    </div>
+                </div>
             </div>
 
             {events.length === 0 ? (
@@ -45,14 +91,16 @@ export default function Index({ events }: { events: any[] }) {
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-5">
                                                 <div className="w-16 h-16 bg-slate-100 rounded-2xl flex-shrink-0 overflow-hidden relative">
-                                                    {event.thumbnail ? (
-                                                        <img src={`/storage/${event.thumbnail}`} className="w-full h-full object-cover" />
+                                                    {event.thumbnail_url || event.thumbnail ? (
+                                                        <img src={event.thumbnail_url || `/storage/${event.thumbnail}`} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <Calendar className="m-auto text-slate-300" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition">{event.title}</h4>
+                                                    <Link href={route('organizer.events.show', event.id)}>
+                                                        <h4 className="font-bold text-slate-900 hover:text-indigo-600 transition">{event.title}</h4>
+                                                    </Link>
                                                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                                                         <span className="flex items-center gap-1"><MapPin size={12}/> {event.location}</span>
                                                         <span>•</span>
@@ -71,13 +119,13 @@ export default function Index({ events }: { events: any[] }) {
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-2 text-sm font-bold text-slate-600">
                                                 <Users size={16} className="text-gray-300" />
-                                                0 / {event.available_slots}
+                                                {event.participants_count || 0} / {event.available_slots}
                                             </div>
                                         </td>
                                         <td className="px-8 py-6 text-right">
-                                            <button className="p-2 text-gray-300 hover:text-indigo-600 transition">
-                                                <MoreHorizontal size={20} />
-                                            </button>
+                                            <Link href={route('organizer.events.show', event.id)} className="p-2 text-gray-300 hover:text-indigo-600 transition inline-block">
+                                                <ExternalLink size={20} />
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}

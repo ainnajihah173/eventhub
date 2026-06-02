@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Event;
 use App\Models\User;
+use App\Models\Booking;
 use App\Models\OrganizerProfile;
 use Inertia\Inertia;
 
@@ -39,11 +40,19 @@ class DashboardController extends Controller
             ];
         }
 
-        // Logic for ATTENDEE (User)
+        // Inside the User (Attendee) logic block:
         if ($user->role === 'user') {
             $data = [
-                'upcoming_events' => Event::where('status', 'published')->latest()->take(6)->get() ?? [],
-                'my_bookings_count' => 0,
+                'upcoming_events' => Event::where('status', 'published')
+                    ->where('start_date_time', '>', now())
+                    ->where('available_slots', '>', 0)
+                    ->latest()->take(3)->get(),
+                'recent_bookings' => Booking::where('user_id', $user->id)
+                    ->with('event')
+                    ->latest()->take(4)->get(),
+                'stats' => [
+                    'total_tickets' => Booking::where('user_id', $user->id)->where('status', 'confirmed')->count(),
+                ]
             ];
         }
 

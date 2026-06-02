@@ -32,4 +32,9 @@ class Event extends Model
         return $this->organizer();
     }
 
+    public function attendees()
+    {
+        return $this->hasManyThrough(User::class, Booking::class, 'event_id', 'id', 'id', 'user_id');
+    }
+
 }

@@ -12,6 +12,7 @@ export default function Dashboard(props: any) {
     const stats = page.stats ?? {};
     const recent_events = page.recent_events ?? [];
     const upcoming_events = page.upcoming_events ?? [];
+    const my_bookings = page.recent_bookings ?? [];
 
     return (
         <DashboardLayout>
@@ -25,7 +26,11 @@ export default function Dashboard(props: any) {
                 )}
 
                 {role === 'user' && (
-                    <AttendeeView events={upcoming_events} />
+                    <AttendeeView 
+                        upcoming_events={upcoming_events} 
+                        my_bookings={my_bookings} 
+                        stats={stats} 
+                    />
                 )}
 
                 {/* Fallback if role is undefined */}
