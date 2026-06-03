@@ -34,7 +34,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             },
             {
                 label: 'MODERATION', items: [
+                    { label: 'Categories', icon: <ShieldCheck size={18} />, href: route('admin.categories.index') },
                     { label: 'Event Review', icon: <CheckSquare size={18} />, href: route('admin.events.moderation') },
+                    
                 ]
             }
         ],
@@ -153,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Notification System (Flash Messages) */}
                 <div className="fixed top-6 right-6 z-[100] pointer-events-none flex flex-col gap-3 w-full max-w-sm">
                     <AnimatePresence>
-                        {(flash?.message || flash?.success) && (
+                        {isVisible && (flash?.message || flash?.success) && (
                             <motion.div 
                                 initial={{ opacity: 0, x: 20, scale: 0.9 }}
                                 animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -167,10 +169,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider">Success</h5>
                                     <p className="text-sm font-medium text-slate-500 mt-0.5">{flash.message || flash.success}</p>
                                 </div>
+                                <button onClick={() => setIsVisible(false)} className="pointer-events-auto text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={16} />
+                                </button>
                             </motion.div>
                         )}
 
-                        {flash?.error && (
+                        {isVisible && flash?.error && (
                             <motion.div 
                                 initial={{ opacity: 0, x: 20, scale: 0.9 }}
                                 animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -184,6 +189,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     <h5 className="text-xs font-black text-slate-900 uppercase tracking-wider">Error</h5>
                                     <p className="text-sm font-medium text-slate-500 mt-0.5">{flash.error}</p>
                                 </div>
+                                <button onClick={() => setIsVisible(false)} className="pointer-events-auto text-slate-400 hover:text-slate-600 transition-colors">
+                                    <X size={16} />
+                                </button>
                             </motion.div>
                         )}
                     </AnimatePresence>

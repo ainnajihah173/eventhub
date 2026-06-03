@@ -7,6 +7,7 @@ use App\Http\Controllers\Organizer\EventController as OrganizerEventController;
 use App\Http\Controllers\Attendee\EventDiscoveryController;
 use App\Http\Controllers\Attendee\BookingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CategoryController;
 use Inertia\Inertia;
 
 /*
@@ -43,6 +44,8 @@ Route::middleware(['auth', 'verified', 'not_suspended'])->group(function () {
         Route::get('/events/moderation', [EventModerationController::class, 'index'])->name('events.moderation');
         Route::post('/events/{event}/approve', [EventModerationController::class, 'approve'])->name('events.approve');
         Route::post('/events/{event}/reject', [EventModerationController::class, 'reject'])->name('events.reject');
+
+        Route::resource('categories', CategoryController::class)->except(['create', 'edit', 'show']);
 
     });
 
